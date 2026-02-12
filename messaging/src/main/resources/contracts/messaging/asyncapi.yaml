@@ -1,0 +1,109 @@
+asyncapi: 2.6.0
+info:
+  title: Resume Messaging Realtime Contract
+  version: 1.0.0
+  description: Contract-first definition for STOMP/SockJS messaging topics.
+defaultContentType: application/json
+servers:
+  messagingWebSocket:
+    url: /ws
+    protocol: stomp
+    description: SockJS STOMP endpoint
+channels:
+  /topic/conversations/{conversationId}/messages:
+    description: Broadcasts new messages in a conversation
+    parameters:
+      conversationId:
+        description: Conversation identifier
+        schema:
+          type: integer
+          format: int64
+    subscribe:
+      operationId: onConversationMessage
+      message:
+        $ref: '#/components/messages/ConversationMessage'
+
+  /topic/conversations/{conversationId}/read:
+    description: Broadcasts read markers in a conversation
+    parameters:
+      conversationId:
+        description: Conversation identifier
+        schema:
+          type: integer
+          format: int64
+    subscribe:
+      operationId: onConversationRead
+      message:
+        $ref: '#/components/messages/ConversationRead'
+
+components:
+  messages:
+    ConversationMessage:
+      name: ConversationMessage
+      title: Conversation message event payload
+      payload:
+        $ref: '#/components/schemas/MessageItem'
+
+    ConversationRead:
+      name: ConversationRead
+      title: Conversation read event payload
+      payload:
+        $ref: '#/components/schemas/ReadEvent'
+
+  schemas:
+    MessageItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        senderId:
+          type: integer
+          format: int64
+        body:
+          type: string
+        created:
+          type: string
+          format: date-time
+        edited:
+          type: string
+          format: date-time
+          nullable: true
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachmentItem'
+      required: [id, senderId, body, created, attachments]
+
+    AttachmentItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        originalName:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+      required: [id, originalName, contentType, size]
+
+    ReadEvent:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+          format: int64
+        profileId:
+          type: integer
+          format: int64
+        lastReadMessageId:
+          type: integer
+          format: int64
+      required: [conversationId, profileId, lastReadMessageId]

@@ -1,0 +1,392 @@
+openapi: 3.0.3
+info:
+  title: Resume Messaging API Contract
+  version: 1.0.0
+  description: Contract-first definition for messaging REST API.
+servers:
+  - url: /
+tags:
+  - name: Messaging
+    description: Messaging REST operations
+security:
+  - bearerAuth: []
+paths:
+  /api/messages/conversations:
+    post:
+      tags: [Messaging]
+      summary: Create or resolve direct conversation
+      operationId: createConversation
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConversationRequest'
+      responses:
+        '200':
+          description: Conversation created or already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateConversationResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    get:
+      tags: [Messaging]
+      summary: List current profile conversations
+      operationId: listConversations
+      responses:
+        '200':
+          description: Conversations list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConversationSummary'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/messages/conversations/{id}/messages:
+    get:
+      tags: [Messaging]
+      summary: List conversation messages
+      operationId: listMessages
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: beforeId
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        '200':
+          description: Message page (descending by created/id)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+    post:
+      tags: [Messaging]
+      summary: Send message to conversation
+      operationId: sendMessage
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '200':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageItem'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/messages/conversations/{id}/read:
+    post:
+      tags: [Messaging]
+      summary: Mark conversation read by current profile
+      operationId: markRead
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkConversationReadRequest'
+      responses:
+        '200':
+          description: Read marker updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadEvent'
+        '204':
+          description: No messages to mark as read
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/messages/conversations/{id}/attachments:
+    post:
+      tags: [Messaging]
+      summary: Upload message attachment
+      operationId: uploadAttachment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Attachment uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachmentItem'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/messages/attachments/{id}:
+    get:
+      tags: [Messaging]
+      summary: Download attachment content
+      operationId: downloadAttachment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Attachment file content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/messages/unread-count:
+    get:
+      tags: [Messaging]
+      summary: Get total unread count for current profile
+      operationId: unreadCount
+      responses:
+        '200':
+          description: Total unread count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    ApiError:
+      description: Error payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+
+  schemas:
+    CreateConversationRequest:
+      type: object
+      properties:
+        otherProfileId:
+          type: integer
+          format: int64
+      required: [otherProfileId]
+
+    CreateConversationResponse:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+          format: int64
+        otherProfileId:
+          type: integer
+          format: int64
+      required: [conversationId]
+
+    SendMessageRequest:
+      type: object
+      properties:
+        body:
+          type: string
+        attachmentIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+    MarkConversationReadRequest:
+      type: object
+      properties:
+        lastReadMessageId:
+          type: integer
+          format: int64
+
+    ConversationSummary:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+          format: int64
+        otherProfileId:
+          type: integer
+          format: int64
+        lastMessage:
+          $ref: '#/components/schemas/MessageItem'
+        unreadCount:
+          type: integer
+          format: int64
+      required: [conversationId, unreadCount]
+
+    MessageItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        senderId:
+          type: integer
+          format: int64
+        body:
+          type: string
+        created:
+          type: string
+          format: date-time
+        edited:
+          type: string
+          format: date-time
+          nullable: true
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachmentItem'
+      required: [id, senderId, body, created, attachments]
+
+    AttachmentItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        originalName:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+      required: [id, originalName, contentType, size]
+
+    ReadEvent:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+          format: int64
+        profileId:
+          type: integer
+          format: int64
+        lastReadMessageId:
+          type: integer
+          format: int64
+      required: [conversationId, profileId, lastReadMessageId]
+
+    UnreadCountResponse:
+      type: object
+      properties:
+        unreadCount:
+          type: integer
+          format: int64
+      required: [unreadCount]
+
+    ApiErrorField:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+      required: [field, message]
+
+    ApiErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiErrorField'
+      required: [timestamp, status, error, message, path, errors]
