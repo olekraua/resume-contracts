@@ -17,6 +17,8 @@ Contract-first repository for cross-service and frontend/backend integration con
 
 ## Backward Compatibility Check (CI)
 - CI compares contract schemas with the base revision and runs:
+  - push: against previous push SHA (`github.event.before`)
+  - pull_request: against target branch (`origin/<base>`)
   - OpenAPI check with `openapi-diff`
   - AsyncAPI check with `@asyncapi/diff`
 - The check fails if:

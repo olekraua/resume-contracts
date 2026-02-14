@@ -43,6 +43,8 @@ jobs:
         run: npm ci
 
       - name: Check contract schema compatibility
+        env:
+          SCHEMA_BASE_REF: ${{ github.event.before }}
         run: npm run contracts:check
 
       - name: Build and run checks
