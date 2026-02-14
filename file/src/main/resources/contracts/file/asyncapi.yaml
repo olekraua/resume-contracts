@@ -1,0 +1,283 @@
+asyncapi: 2.6.0
+info:
+  title: Resume File Platform Event Contract
+  version: 1.0.0
+  description: Kafka event definitions for file processing pipeline.
+defaultContentType: application/json
+servers:
+  kafka:
+    protocol: kafka
+    url: kafka:9092
+channels:
+  resume.file.uploaded:
+    description: Files uploaded and queued for antivirus stage
+    publish:
+      operationId: publishFileUploaded
+      message:
+        $ref: '#/components/messages/FileUploaded'
+    subscribe:
+      operationId: consumeFileUploaded
+      message:
+        $ref: '#/components/messages/FileUploaded'
+
+  resume.file.antivirus.passed:
+    description: Antivirus stage successful
+    publish:
+      operationId: publishFileAntivirusPassed
+      message:
+        $ref: '#/components/messages/FileAntivirusPassed'
+    subscribe:
+      operationId: consumeFileAntivirusPassed
+      message:
+        $ref: '#/components/messages/FileAntivirusPassed'
+
+  resume.file.antivirus.failed:
+    description: Antivirus stage failed
+    publish:
+      operationId: publishFileAntivirusFailed
+      message:
+        $ref: '#/components/messages/FileAntivirusFailed'
+    subscribe:
+      operationId: consumeFileAntivirusFailed
+      message:
+        $ref: '#/components/messages/FileAntivirusFailed'
+
+  resume.file.moderation.passed:
+    description: Moderation stage successful
+    publish:
+      operationId: publishFileModerationPassed
+      message:
+        $ref: '#/components/messages/FileModerationPassed'
+    subscribe:
+      operationId: consumeFileModerationPassed
+      message:
+        $ref: '#/components/messages/FileModerationPassed'
+
+  resume.file.moderation.failed:
+    description: Moderation stage failed
+    publish:
+      operationId: publishFileModerationFailed
+      message:
+        $ref: '#/components/messages/FileModerationFailed'
+    subscribe:
+      operationId: consumeFileModerationFailed
+      message:
+        $ref: '#/components/messages/FileModerationFailed'
+
+  resume.file.thumbnail.ready:
+    description: Thumbnail stage successful
+    publish:
+      operationId: publishFileThumbnailReady
+      message:
+        $ref: '#/components/messages/FileThumbnailReady'
+    subscribe:
+      operationId: consumeFileThumbnailReady
+      message:
+        $ref: '#/components/messages/FileThumbnailReady'
+
+  resume.file.thumbnail.failed:
+    description: Thumbnail stage failed
+    publish:
+      operationId: publishFileThumbnailFailed
+      message:
+        $ref: '#/components/messages/FileThumbnailFailed'
+    subscribe:
+      operationId: consumeFileThumbnailFailed
+      message:
+        $ref: '#/components/messages/FileThumbnailFailed'
+
+  resume.file.ready:
+    description: File is fully processed and ready
+    publish:
+      operationId: publishFileReady
+      message:
+        $ref: '#/components/messages/FileReady'
+    subscribe:
+      operationId: consumeFileReady
+      message:
+        $ref: '#/components/messages/FileReady'
+
+  resume.file.failed:
+    description: File processing failed
+    publish:
+      operationId: publishFileFailed
+      message:
+        $ref: '#/components/messages/FileFailed'
+    subscribe:
+      operationId: consumeFileFailed
+      message:
+        $ref: '#/components/messages/FileFailed'
+
+  resume.file.deleted:
+    description: File deleted events for async cleanup
+    publish:
+      operationId: publishFileDeleted
+      message:
+        $ref: '#/components/messages/FileDeleted'
+    subscribe:
+      operationId: consumeFileDeleted
+      message:
+        $ref: '#/components/messages/FileDeleted'
+components:
+  messages:
+    FileUploaded:
+      name: FileUploaded
+      title: File uploaded and waiting for heavy async processing
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.uploaded.v1]
+
+    FileAntivirusPassed:
+      name: FileAntivirusPassed
+      title: Antivirus stage completed successfully
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.antivirus.passed.v1]
+
+    FileAntivirusFailed:
+      name: FileAntivirusFailed
+      title: Antivirus stage failed
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.antivirus.failed.v1]
+
+    FileModerationPassed:
+      name: FileModerationPassed
+      title: Moderation stage completed successfully
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.moderation.passed.v1]
+
+    FileModerationFailed:
+      name: FileModerationFailed
+      title: Moderation stage failed
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.moderation.failed.v1]
+
+    FileThumbnailReady:
+      name: FileThumbnailReady
+      title: Thumbnail stage completed successfully
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.thumbnail.ready.v1]
+
+    FileThumbnailFailed:
+      name: FileThumbnailFailed
+      title: Thumbnail stage failed
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.thumbnail.failed.v1]
+
+    FileReady:
+      name: FileReady
+      title: File processing completed successfully
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.ready.v1]
+
+    FileFailed:
+      name: FileFailed
+      title: File processing failed
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.failed.v1]
+
+    FileDeleted:
+      name: FileDeleted
+      title: File was deleted and cleanup is requested
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              eventType:
+                type: string
+                enum: [file.deleted.v1]
+
+  schemas:
+    EventEnvelope:
+      type: object
+      required: [eventId, eventType, occurredAt, source, data]
+      properties:
+        eventId:
+          type: string
+        eventType:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+        data:
+          $ref: '#/components/schemas/FileEventData'
+
+    FileEventData:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        ownerId:
+          type: integer
+          format: int64
+        bucket:
+          type: string
+        objectKey:
+          type: string
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+          format: int64
+        visibility:
+          type: string
+        purpose:
+          type: string
+        reason:
+          type: string

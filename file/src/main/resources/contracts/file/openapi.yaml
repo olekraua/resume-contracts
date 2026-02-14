@@ -1,0 +1,320 @@
+openapi: 3.0.3
+info:
+  title: Resume File Platform API Contract
+  version: 1.0.0
+  description: Contract-first definition for scalable file upload/download APIs.
+servers:
+  - url: /
+tags:
+  - name: File
+    description: File platform operations
+security:
+  - bearerAuth: []
+paths:
+  /api/files/uploads:initiate:
+    post:
+      tags: [File]
+      summary: Start direct-to-storage upload flow
+      operationId: initiateUpload
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateUploadRequest'
+      responses:
+        '200':
+          description: Upload session started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiateUploadResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/files/uploads/{uploadId}:complete:
+    post:
+      tags: [File]
+      summary: Finalize upload and trigger async processing
+      operationId: completeUpload
+      parameters:
+        - in: path
+          name: uploadId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteUploadRequest'
+      responses:
+        '200':
+          description: File metadata in PROCESSING/READY state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItem'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '409':
+          $ref: '#/components/responses/ApiError'
+
+  /api/files/{id}:
+    get:
+      tags: [File]
+      summary: Get file metadata
+      operationId: getFile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: File metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+    delete:
+      tags: [File]
+      summary: Soft delete file and enqueue async storage cleanup
+      operationId: deleteFile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/files/{id}/download-url:
+    post:
+      tags: [File]
+      summary: Request signed download URL
+      operationId: createDownloadUrl
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DownloadUrlRequest'
+      responses:
+        '200':
+          description: Signed download url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadUrlResponse'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    ApiError:
+      description: Error payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+
+  schemas:
+    InitiateUploadRequest:
+      type: object
+      required: [fileName, contentType, sizeBytes]
+      properties:
+        fileName:
+          type: string
+          maxLength: 255
+        contentType:
+          type: string
+          maxLength: 255
+        sizeBytes:
+          type: integer
+          format: int64
+          minimum: 1
+        purpose:
+          type: string
+          maxLength: 64
+        visibility:
+          type: string
+          enum: [PRIVATE, PUBLIC]
+        checksumSha256:
+          type: string
+          maxLength: 128
+
+    InitiateUploadResponse:
+      type: object
+      required: [fileId, uploadId, objectKey, uploadUrl, expiresAt, status]
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        uploadId:
+          type: string
+          format: uuid
+        objectKey:
+          type: string
+        uploadUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+
+    CompleteUploadRequest:
+      type: object
+      properties:
+        eTag:
+          type: string
+          maxLength: 128
+
+    FileItem:
+      type: object
+      required: [id, ownerId, objectKey, contentType, sizeBytes, visibility, status, createdAt, updatedAt, variants]
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerId:
+          type: integer
+          format: int64
+        bucket:
+          type: string
+        objectKey:
+          type: string
+        originalName:
+          type: string
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+          format: int64
+        checksumSha256:
+          type: string
+        visibility:
+          type: string
+          enum: [PRIVATE, PUBLIC]
+        status:
+          type: string
+          enum: [UPLOADING, PROCESSING, READY, FAILED, DELETED]
+        purpose:
+          type: string
+        etag:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileVariant'
+
+    FileVariant:
+      type: object
+      required: [variantType, objectKey, contentType, status]
+      properties:
+        variantType:
+          type: string
+        objectKey:
+          type: string
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+          format: int64
+        status:
+          type: string
+
+    DownloadUrlRequest:
+      type: object
+      properties:
+        expiresInSeconds:
+          type: integer
+          minimum: 60
+          maximum: 3600
+
+    DownloadUrlResponse:
+      type: object
+      required: [fileId, downloadUrl, expiresAt]
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        downloadUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+
+    ApiErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+      required: [timestamp, status, error, message]
