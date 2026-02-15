@@ -1,0 +1,234 @@
+asyncapi: 2.6.0
+info:
+  title: Resume Async Backbone Contract
+  version: 1.0.0
+  description: Kafka contracts for profile/auth/messaging async backbone topics.
+defaultContentType: application/json
+servers:
+  kafka:
+    protocol: kafka
+    url: kafka:9092
+channels:
+  resume.profile.index:
+    description: Profile snapshot events for search indexing.
+    publish:
+      operationId: publishProfileIndex
+      message:
+        $ref: '#/components/messages/ProfileIndex'
+    subscribe:
+      operationId: consumeProfileIndex
+      message:
+        $ref: '#/components/messages/ProfileIndex'
+
+  resume.profile.remove:
+    description: Profile removal events for de-indexing.
+    publish:
+      operationId: publishProfileRemove
+      message:
+        $ref: '#/components/messages/ProfileRemove'
+    subscribe:
+      operationId: consumeProfileRemove
+      message:
+        $ref: '#/components/messages/ProfileRemove'
+
+  resume.auth.restore-access-mail:
+    description: Restore access email request events for notification service.
+    publish:
+      operationId: publishRestoreAccessMailRequested
+      message:
+        $ref: '#/components/messages/RestoreAccessMailRequested'
+    subscribe:
+      operationId: consumeRestoreAccessMailRequested
+      message:
+        $ref: '#/components/messages/RestoreAccessMailRequested'
+
+  resume.messaging.message-sent:
+    description: Conversation message events emitted by messaging outbox.
+    publish:
+      operationId: publishMessageSent
+      message:
+        $ref: '#/components/messages/ConversationMessage'
+    subscribe:
+      operationId: consumeMessageSent
+      message:
+        $ref: '#/components/messages/ConversationMessage'
+
+  resume.messaging.conversation-read:
+    description: Conversation read marker events emitted by messaging outbox.
+    publish:
+      operationId: publishConversationRead
+      message:
+        $ref: '#/components/messages/ConversationRead'
+    subscribe:
+      operationId: consumeConversationRead
+      message:
+        $ref: '#/components/messages/ConversationRead'
+
+components:
+  messageTraits:
+    BackboneHeaders:
+      headers:
+        type: object
+        required: [x-event-id, x-event-type, x-source-service, x-occurred-at]
+        properties:
+          x-event-id:
+            type: string
+          x-event-type:
+            type: string
+          x-source-service:
+            type: string
+          x-occurred-at:
+            type: string
+            format: date-time
+
+  messages:
+    ProfileIndex:
+      name: ProfileIndex
+      title: Profile indexing event
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ProfileIndexingSnapshot'
+
+    ProfileRemove:
+      name: ProfileRemove
+      title: Profile remove event
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ProfileRemovalPayload'
+
+    RestoreAccessMailRequested:
+      name: RestoreAccessMailRequested
+      title: Restore access mail requested event
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/RestoreAccessMailRequestedEvent'
+
+    ConversationMessage:
+      name: ConversationMessage
+      title: Conversation message event payload
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/MessageItem'
+
+    ConversationRead:
+      name: ConversationRead
+      title: Conversation read marker event payload
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ReadEvent'
+
+  schemas:
+    ProfileIndexingSnapshot:
+      type: object
+      properties:
+        profileId:
+          type: integer
+          format: int64
+        uid:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        smallPhoto:
+          type: string
+        birthDay:
+          type: string
+          format: date
+        objective:
+          type: string
+        summary:
+          type: string
+        info:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+      required: [profileId, uid, firstName, lastName, skills]
+
+    ProfileRemovalPayload:
+      type: object
+      properties:
+        profileId:
+          type: integer
+          format: int64
+      required: [profileId]
+
+    RestoreAccessMailRequestedEvent:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        link:
+          type: string
+      required: [email, firstName, link]
+
+    MessageItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        senderId:
+          type: integer
+          format: int64
+        body:
+          type: string
+        created:
+          type: string
+          format: date-time
+        edited:
+          type: string
+          format: date-time
+          nullable: true
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachmentItem'
+      required: [id, senderId, body, created, attachments]
+
+    AttachmentItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        originalName:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+      required: [id, originalName, contentType, size]
+
+    ReadEvent:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+          format: int64
+        profileId:
+          type: integer
+          format: int64
+        lastReadMessageId:
+          type: integer
+          format: int64
+      required: [conversationId, profileId, lastReadMessageId]

@@ -32,6 +32,7 @@ Run locally:
 ## Contracts
 - REST OpenAPI: `messaging/src/main/resources/contracts/messaging/openapi.yaml`
 - Realtime AsyncAPI: `messaging/src/main/resources/contracts/messaging/asyncapi.yaml`
+- Async backbone (Kafka) AsyncAPI: `messaging/src/main/resources/contracts/backbone/asyncapi.yaml`
 
 ## Consumer usage
 Maven dependency:
