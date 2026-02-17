@@ -1,0 +1,664 @@
+openapi: 3.0.3
+info:
+  title: Resume Auth Service API Contract
+  version: 1.0.0
+  description: Public REST and OIDC contract for resume-auth-service.
+servers:
+  - url: /
+tags:
+  - name: Auth
+  - name: Account
+  - name: Session
+  - name: OIDC
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new profile account
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '201':
+          description: Registered and authenticated session payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '403':
+          $ref: '#/components/responses/ApiError'
+        '409':
+          description: UID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UidConflictResponse'
+
+  /api/auth/uid-hint:
+    get:
+      tags: [Auth]
+      summary: Generate profile UID hint from first and last name
+      operationId: uidHint
+      security: []
+      parameters:
+        - in: query
+          name: firstName
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: lastName
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Suggested UID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UidHintResponse'
+
+  /api/auth/restore:
+    post:
+      tags: [Auth]
+      summary: Request password restore link
+      operationId: requestRestore
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreAccessRequest'
+      responses:
+        '200':
+          description: Restore request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestoreRequestResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '403':
+          $ref: '#/components/responses/ApiError'
+
+  /api/auth/restore/{token}:
+    get:
+      tags: [Auth]
+      summary: Validate restore token
+      operationId: restoreStatus
+      security: []
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Restore token status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestoreTokenResponse'
+        '403':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+    post:
+      tags: [Auth]
+      summary: Complete password restore by token
+      operationId: restorePassword
+      security: []
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestorePasswordRequest'
+      responses:
+        '204':
+          description: Password reset completed
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '403':
+          $ref: '#/components/responses/ApiError'
+
+  /api/auth/logout-all:
+    post:
+      tags: [Auth]
+      summary: Revoke active authorizations and terminate current session
+      operationId: logoutAll
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Session login endpoint (enabled only in session mode)
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Session status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '429':
+          $ref: '#/components/responses/ApiError'
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current session
+      operationId: logout
+      responses:
+        '204':
+          description: Logged out
+
+  /api/account/password:
+    post:
+      tags: [Account]
+      summary: Change account password
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Password changed
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/account/login:
+    post:
+      tags: [Account]
+      summary: Change account UID/login
+      operationId: changeLogin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeLoginRequest'
+      responses:
+        '200':
+          description: Login changed and re-login required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeLoginResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '409':
+          description: UID conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UidConflictResponse'
+
+  /api/account/remove:
+    delete:
+      tags: [Account]
+      summary: Remove current profile account
+      operationId: removeAccount
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Account removed
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/me:
+    get:
+      tags: [Session]
+      summary: Get current authentication session status
+      operationId: session
+      security: []
+      responses:
+        '200':
+          description: Session status payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+
+  /api/csrf:
+    get:
+      tags: [Session]
+      summary: Read CSRF token metadata and value
+      operationId: csrf
+      security: []
+      responses:
+        '200':
+          description: CSRF metadata and token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfResponse'
+
+  /.well-known/openid-configuration:
+    get:
+      tags: [OIDC]
+      summary: OpenID Provider Metadata
+      operationId: openidConfiguration
+      security: []
+      responses:
+        '200':
+          description: OIDC provider metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenIdProviderConfiguration'
+
+  /oauth2/authorize:
+    get:
+      tags: [OIDC]
+      summary: OAuth2 Authorization Endpoint
+      operationId: authorize
+      security: []
+      parameters:
+        - in: query
+          name: response_type
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: client_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: redirect_uri
+          required: true
+          schema:
+            type: string
+            format: uri
+        - in: query
+          name: scope
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: state
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: code_challenge
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: code_challenge_method
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to client with authorization response
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /oauth2/token:
+    post:
+      tags: [OIDC]
+      summary: OAuth2 Token Endpoint
+      operationId: token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRequestForm'
+      responses:
+        '200':
+          description: Access token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OidcTokenResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /oauth2/jwks:
+    get:
+      tags: [OIDC]
+      summary: JWK Set Endpoint
+      operationId: jwks
+      security: []
+      responses:
+        '200':
+          description: JSON Web Key Set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwkSet'
+
+  /connect/logout:
+    get:
+      tags: [OIDC]
+      summary: OIDC RP-Initiated Logout Endpoint
+      operationId: oidcLogout
+      security: []
+      parameters:
+        - in: query
+          name: post_logout_redirect_uri
+          required: false
+          schema:
+            type: string
+            format: uri
+        - in: query
+          name: id_token_hint
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect after logout
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    ApiError:
+      description: Error payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+
+  schemas:
+    RegistrationRequest:
+      type: object
+      required: [uid, firstName, lastName, password, confirmPassword]
+      properties:
+        uid:
+          type: string
+          minLength: 3
+          maxLength: 64
+        firstName:
+          type: string
+          maxLength: 50
+        lastName:
+          type: string
+          maxLength: 50
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+        confirmPassword:
+          type: string
+          minLength: 6
+          maxLength: 100
+
+    RestoreAccessRequest:
+      type: object
+      required: [identifier]
+      properties:
+        identifier:
+          type: string
+          maxLength: 100
+
+    RestorePasswordRequest:
+      type: object
+      required: [password, confirmPassword]
+      properties:
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+        confirmPassword:
+          type: string
+          minLength: 6
+          maxLength: 100
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        rememberMe:
+          type: boolean
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword, confirmPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 6
+          maxLength: 100
+        confirmPassword:
+          type: string
+          minLength: 6
+          maxLength: 100
+
+    ChangeLoginRequest:
+      type: object
+      required: [newUid]
+      properties:
+        newUid:
+          type: string
+          minLength: 3
+          maxLength: 64
+
+    SessionResponse:
+      type: object
+      required: [authenticated]
+      properties:
+        authenticated:
+          type: boolean
+        uid:
+          type: string
+          nullable: true
+        fullName:
+          type: string
+          nullable: true
+
+    UidHintResponse:
+      type: object
+      required: [uid]
+      properties:
+        uid:
+          type: string
+
+    RestoreRequestResponse:
+      type: object
+      required: [requested]
+      properties:
+        requested:
+          type: boolean
+        restoreLink:
+          type: string
+          nullable: true
+
+    RestoreTokenResponse:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+
+    ChangeLoginResponse:
+      type: object
+      required: [newUid, reloginRequired]
+      properties:
+        newUid:
+          type: string
+        reloginRequired:
+          type: boolean
+
+    CsrfResponse:
+      type: object
+      required: [headerName, parameterName, token]
+      properties:
+        headerName:
+          type: string
+        parameterName:
+          type: string
+        token:
+          type: string
+
+    UidConflictResponse:
+      type: object
+      required: [error, uidSuggestions]
+      properties:
+        error:
+          $ref: '#/components/schemas/ApiErrorResponse'
+        uidSuggestions:
+          type: array
+          items:
+            type: string
+
+    ApiErrorResponse:
+      type: object
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiFieldError'
+
+    ApiFieldError:
+      type: object
+      required: [field, message]
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+
+    OpenIdProviderConfiguration:
+      type: object
+      required: [issuer, authorization_endpoint, token_endpoint, jwks_uri]
+      properties:
+        issuer:
+          type: string
+          format: uri
+        authorization_endpoint:
+          type: string
+          format: uri
+        token_endpoint:
+          type: string
+          format: uri
+        jwks_uri:
+          type: string
+          format: uri
+      additionalProperties: true
+
+    TokenRequestForm:
+      type: object
+      required: [grant_type]
+      properties:
+        grant_type:
+          type: string
+        client_id:
+          type: string
+        client_secret:
+          type: string
+        code:
+          type: string
+        redirect_uri:
+          type: string
+          format: uri
+        code_verifier:
+          type: string
+        refresh_token:
+          type: string
+        scope:
+          type: string
+
+    OidcTokenResponse:
+      type: object
+      required: [access_token, token_type]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+        id_token:
+          type: string
+        scope:
+          type: string
+
+    JwkSet:
+      type: object
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            additionalProperties: true

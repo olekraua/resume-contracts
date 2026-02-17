@@ -31,8 +31,14 @@
     </distributionManagement>
 
     <modules>
+        <module>auth</module>
+        <module>profile</module>
+        <module>search</module>
+        <module>staticdata</module>
         <module>messaging</module>
         <module>file</module>
+        <module>notification</module>
+        <module>outbox-relay</module>
     </modules>
 
     <properties>

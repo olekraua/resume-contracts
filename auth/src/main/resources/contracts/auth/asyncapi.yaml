@@ -1,0 +1,61 @@
+asyncapi: 2.6.0
+info:
+  title: Resume Auth Event Contract
+  version: 1.0.0
+  description: Public Kafka event contract emitted by auth-service via outbox relay.
+defaultContentType: application/json
+servers:
+  kafka:
+    protocol: kafka
+    url: kafka:9092
+channels:
+  resume.auth.restore-access-mail:
+    description: Restore access e-mail request event.
+    publish:
+      operationId: publishRestoreAccessMail
+      message:
+        $ref: '#/components/messages/RestoreAccessMailRequested'
+    subscribe:
+      operationId: consumeRestoreAccessMail
+      message:
+        $ref: '#/components/messages/RestoreAccessMailRequested'
+components:
+  messageTraits:
+    OutboxHeaders:
+      headers:
+        type: object
+        required: [x-event-id, x-event-type, x-source-service, x-occurred-at]
+        properties:
+          x-event-id:
+            type: string
+          x-event-type:
+            type: string
+            enum: [RESTORE_ACCESS_MAIL]
+          x-source-service:
+            type: string
+            enum: [resume-auth-service]
+          x-occurred-at:
+            type: string
+            format: date-time
+
+  messages:
+    RestoreAccessMailRequested:
+      name: RestoreAccessMailRequested
+      title: Password restore e-mail requested
+      traits:
+        - $ref: '#/components/messageTraits/OutboxHeaders'
+      payload:
+        $ref: '#/components/schemas/RestoreAccessMailRequestedEvent'
+
+  schemas:
+    RestoreAccessMailRequestedEvent:
+      type: object
+      required: [email, firstName, link]
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        link:
+          type: string

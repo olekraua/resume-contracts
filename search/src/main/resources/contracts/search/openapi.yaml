@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: Resume Search Service API Contract
+  version: 1.0.0
+  description: Public query API for profile search and suggestions.
+servers:
+  - url: /
+tags:
+  - name: Search
+paths:
+  /api/search:
+    get:
+      tags: [Search]
+      summary: Full-text profile search
+      operationId: searchProfiles
+      security: []
+      parameters:
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Paged search result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponseProfileSummary'
+
+  /api/suggest:
+    get:
+      tags: [Search]
+      summary: Fast profile suggestions
+      operationId: suggestProfiles
+      security: []
+      parameters:
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 5
+      responses:
+        '200':
+          description: Suggestion list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SuggestItem'
+
+components:
+  schemas:
+    PageResponseProfileSummary:
+      type: object
+      required: [items, page, size, totalElements, totalPages, hasNext]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+
+    ProfileSummary:
+      type: object
+      required: [uid, fullName, age]
+      properties:
+        uid:
+          type: string
+        fullName:
+          type: string
+        age:
+          type: integer
+        city:
+          type: string
+        country:
+          type: string
+        objective:
+          type: string
+        summary:
+          type: string
+        smallPhoto:
+          type: string
+
+    SuggestItem:
+      type: object
+      required: [uid, fullName]
+      properties:
+        uid:
+          type: string
+        fullName:
+          type: string

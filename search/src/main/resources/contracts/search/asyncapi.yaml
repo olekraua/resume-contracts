@@ -1,0 +1,99 @@
+asyncapi: 2.6.0
+info:
+  title: Resume Search Indexing Event Contract
+  version: 1.0.0
+  description: Kafka topics consumed by resume-search-service for index synchronization.
+defaultContentType: application/json
+servers:
+  kafka:
+    protocol: kafka
+    url: kafka:9092
+channels:
+  resume.profile.index:
+    description: Profile snapshot event consumed for indexing.
+    subscribe:
+      operationId: onProfileIndex
+      message:
+        $ref: '#/components/messages/ProfileIndexingSnapshot'
+
+  resume.profile.remove:
+    description: Profile removal event consumed for de-indexing.
+    subscribe:
+      operationId: onProfileRemove
+      message:
+        $ref: '#/components/messages/ProfileRemoved'
+
+components:
+  messageTraits:
+    BackboneHeaders:
+      headers:
+        type: object
+        required: [x-event-id, x-event-type, x-source-service, x-occurred-at]
+        properties:
+          x-event-id:
+            type: string
+          x-event-type:
+            type: string
+            enum: [PROFILE_INDEX, PROFILE_REMOVE]
+          x-source-service:
+            type: string
+          x-occurred-at:
+            type: string
+            format: date-time
+
+  messages:
+    ProfileIndexingSnapshot:
+      name: ProfileIndexingSnapshot
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ProfileIndexingSnapshot'
+
+    ProfileRemoved:
+      name: ProfileRemoved
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ProfileRemovalPayload'
+
+  schemas:
+    ProfileIndexingSnapshot:
+      type: object
+      required: [profileId, uid, firstName, lastName, skills]
+      properties:
+        profileId:
+          type: integer
+          format: int64
+        uid:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        smallPhoto:
+          type: string
+        birthDay:
+          type: string
+          format: date
+        objective:
+          type: string
+        summary:
+          type: string
+        info:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+
+    ProfileRemovalPayload:
+      type: object
+      required: [profileId]
+      properties:
+        profileId:
+          type: integer
+          format: int64

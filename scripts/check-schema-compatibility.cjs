@@ -74,10 +74,16 @@ function listContractFiles() {
         throw new Error(`Failed to list tracked files: ${trackedFiles.stderr.trim()}`);
     }
 
-    return trackedFiles.stdout
+    const untrackedFiles = runGit(["ls-files", "--others", "--exclude-standard"]);
+    if (!untrackedFiles.ok) {
+        throw new Error(`Failed to list untracked files: ${untrackedFiles.stderr.trim()}`);
+    }
+
+    return `${trackedFiles.stdout}\n${untrackedFiles.stdout}`
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean)
+        .filter((value, index, array) => array.indexOf(value) === index)
         .filter((filePath) => {
             const fileName = path.basename(filePath);
             return (

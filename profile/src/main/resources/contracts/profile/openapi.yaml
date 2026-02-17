@@ -1,0 +1,1532 @@
+openapi: 3.0.3
+info:
+  title: Resume Profile Service API Contract
+  version: 1.0.0
+  description: Public and service-to-service REST contract for resume-profile-service.
+servers:
+  - url: /
+tags:
+  - name: Profiles
+  - name: ProfileEdit
+  - name: ProfileConnections
+  - name: ProfileInternal
+paths:
+  /api/profiles:
+    get:
+      tags: [Profiles]
+      summary: List public profiles
+      operationId: listProfiles
+      security: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Paged profile summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponseProfileSummary'
+
+  /api/profiles/{uid}:
+    get:
+      tags: [Profiles]
+      summary: Get full profile details
+      operationId: getProfile
+      security: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Profile details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDetails'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profiles/{uid}/connections:
+    get:
+      tags: [Profiles]
+      summary: List profile connections with filters and paging
+      operationId: listProfileConnections
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/OrderParam'
+        - $ref: '#/components/parameters/QueryParam'
+        - $ref: '#/components/parameters/NameParam'
+        - $ref: '#/components/parameters/CompanyParam'
+        - $ref: '#/components/parameters/CityParam'
+        - $ref: '#/components/parameters/CountryParam'
+      responses:
+        '200':
+          description: Paged connection summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponseConnectionSummary'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profiles/{uid}/connections/mutual:
+    get:
+      tags: [Profiles]
+      summary: List mutual connections with filters and paging
+      operationId: listMutualConnections
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/OrderParam'
+        - $ref: '#/components/parameters/QueryParam'
+        - $ref: '#/components/parameters/NameParam'
+        - $ref: '#/components/parameters/CompanyParam'
+        - $ref: '#/components/parameters/CityParam'
+        - $ref: '#/components/parameters/CountryParam'
+      responses:
+        '200':
+          description: Paged mutual connection summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponseConnectionSummary'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/info:
+    put:
+      tags: [ProfileEdit]
+      summary: Update main profile info
+      operationId: updateProfileInfo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfoForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/contacts:
+    put:
+      tags: [ProfileEdit]
+      summary: Update profile contacts
+      operationId: updateProfileContacts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactsForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/skills:
+    put:
+      tags: [ProfileEdit]
+      summary: Update profile skills
+      operationId: updateProfileSkills
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/practics:
+    put:
+      tags: [ProfileEdit]
+      summary: Update practical experience list
+      operationId: updateProfilePractics
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PracticForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/education:
+    put:
+      tags: [ProfileEdit]
+      summary: Update education list
+      operationId: updateProfileEducation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EducationForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/courses:
+    put:
+      tags: [ProfileEdit]
+      summary: Update courses list
+      operationId: updateProfileCourses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/languages:
+    put:
+      tags: [ProfileEdit]
+      summary: Update spoken/written languages
+      operationId: updateProfileLanguages
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LanguageForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '409':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/certificates:
+    put:
+      tags: [ProfileEdit]
+      summary: Update certificate list
+      operationId: updateProfileCertificates
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/hobbies:
+    put:
+      tags: [ProfileEdit]
+      summary: Update selected hobby IDs
+      operationId: updateProfileHobbies
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HobbyForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/password:
+    put:
+      tags: [ProfileEdit]
+      summary: Change current profile password (when local password mode is enabled)
+      operationId: updateProfilePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '501':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/privacy/connections:
+    get:
+      tags: [ProfileEdit]
+      summary: Get current profile connection visibility policy
+      operationId: getConnectionsVisibility
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Visibility configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionsVisibilityResponse'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    put:
+      tags: [ProfileEdit]
+      summary: Update current profile connection visibility policy
+      operationId: updateConnectionsVisibility
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionsVisibilityForm'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/photo:
+    post:
+      tags: [ProfileEdit]
+      summary: Upload profile photo
+      operationId: uploadProfilePhoto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [profilePhoto]
+              properties:
+                profilePhoto:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Stored photo URLs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    delete:
+      tags: [ProfileEdit]
+      summary: Remove current profile photo
+      operationId: removeProfilePhoto
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Removed
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/certificates/upload:
+    post:
+      tags: [ProfileEdit]
+      summary: Upload certificate image and get generated URLs
+      operationId: uploadCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [certificateFile]
+              properties:
+                certificateFile:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Stored certificate URLs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadCertificateResult'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections:
+    post:
+      tags: [ProfileConnections]
+      summary: Request new connection by body payload
+      operationId: requestConnectionByBody
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionActionRequest'
+      responses:
+        '200':
+          description: Created or existing connection state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionItem'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    put:
+      tags: [ProfileConnections]
+      summary: Accept incoming request by body payload
+      operationId: acceptConnectionByBody
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionActionRequest'
+      responses:
+        '200':
+          description: Accepted connection state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionItem'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    delete:
+      tags: [ProfileConnections]
+      summary: Connection action by body payload (decline/withdraw/remove)
+      operationId: deleteConnectionByBody
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionActionRequest'
+      responses:
+        '204':
+          description: Action completed
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    get:
+      tags: [ProfileConnections]
+      summary: List current profile accepted connections
+      operationId: listOwnConnections
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Accepted connections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConnectionItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections/{uid}:
+    post:
+      tags: [ProfileConnections]
+      summary: Request connection (legacy endpoint)
+      operationId: requestConnectionLegacy
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Connection state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    put:
+      tags: [ProfileConnections]
+      summary: Accept connection request (legacy endpoint)
+      operationId: acceptConnectionLegacy
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Connection state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    delete:
+      tags: [ProfileConnections]
+      summary: Remove accepted connection
+      operationId: removeConnection
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Removed
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections/requests/{uid}:
+    post:
+      tags: [ProfileConnections]
+      summary: Request connection to target UID
+      operationId: requestConnection
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Connection state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+    delete:
+      tags: [ProfileConnections]
+      summary: Withdraw outgoing connection request
+      operationId: withdrawConnectionRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Withdrawn
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections/requests/{uid}/accept:
+    post:
+      tags: [ProfileConnections]
+      summary: Accept incoming connection request
+      operationId: acceptConnectionRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Accepted connection state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections/requests/{uid}/decline:
+    post:
+      tags: [ProfileConnections]
+      summary: Decline incoming connection request
+      operationId: declineConnectionRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Declined
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections/requests/incoming:
+    get:
+      tags: [ProfileConnections]
+      summary: List incoming connection requests
+      operationId: listIncomingConnectionRequests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Incoming requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConnectionItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections/requests/outgoing:
+    get:
+      tags: [ProfileConnections]
+      summary: List outgoing connection requests
+      operationId: listOutgoingConnectionRequests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Outgoing requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConnectionItem'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/profile/connections/overview:
+    get:
+      tags: [ProfileConnections]
+      summary: Combined view of accepted/incoming/outgoing connections
+      operationId: getConnectionOverview
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Connection overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionOverview'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /internal/profiles:
+    post:
+      tags: [ProfileInternal]
+      summary: Register profile for auth-service internal flow
+      operationId: internalRegisterProfile
+      security:
+        - internalBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRegistrationRequest'
+      responses:
+        '200':
+          description: Profile auth payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileAuthResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '409':
+          $ref: '#/components/responses/ApiError'
+
+  /internal/profiles/exists/uid/{uid}:
+    get:
+      tags: [ProfileInternal]
+      summary: Check if UID already exists
+      operationId: internalUidExists
+      security:
+        - internalBearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Existence flag
+          content:
+            application/json:
+              schema:
+                type: boolean
+
+  /internal/profiles/lookup:
+    post:
+      tags: [ProfileInternal]
+      summary: Lookup profile by UID/e-mail/phone
+      operationId: internalProfileLookup
+      security:
+        - internalBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileIdentifierLookupRequest'
+      responses:
+        '200':
+          description: Profile lookup payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileLookupResponse'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /internal/profiles/{id}/uid:
+    put:
+      tags: [ProfileInternal]
+      summary: Update profile UID
+      operationId: internalUpdateUid
+      security:
+        - internalBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUidUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '409':
+          $ref: '#/components/responses/ApiError'
+
+  /internal/profiles/{id}:
+    delete:
+      tags: [ProfileInternal]
+      summary: Remove profile
+      operationId: internalRemoveProfile
+      security:
+        - internalBearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Removed
+        '400':
+          $ref: '#/components/responses/ApiError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageParam:
+      in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    SizeParam:
+      in: query
+      name: size
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+    SortParam:
+      in: query
+      name: sort
+      required: false
+      schema:
+        type: string
+    OrderParam:
+      in: query
+      name: order
+      required: false
+      schema:
+        type: string
+    QueryParam:
+      in: query
+      name: query
+      required: false
+      schema:
+        type: string
+    NameParam:
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+    CompanyParam:
+      in: query
+      name: company
+      required: false
+      schema:
+        type: string
+    CityParam:
+      in: query
+      name: city
+      required: false
+      schema:
+        type: string
+    CountryParam:
+      in: query
+      name: country
+      required: false
+      schema:
+        type: string
+
+  responses:
+    ApiError:
+      description: Error payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+
+  schemas:
+    PageResponseProfileSummary:
+      type: object
+      required: [items, page, size, totalElements, totalPages, hasNext]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+
+    PageResponseConnectionSummary:
+      type: object
+      required: [items, page, size, totalElements, totalPages, hasNext]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectionSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+
+    ProfileSummary:
+      type: object
+      required: [uid, fullName, age]
+      properties:
+        uid:
+          type: string
+        fullName:
+          type: string
+        age:
+          type: integer
+        city:
+          type: string
+        country:
+          type: string
+        objective:
+          type: string
+        summary:
+          type: string
+        smallPhoto:
+          type: string
+
+    ProfileDetails:
+      type: object
+      required: [id, uid, firstName, lastName, fullName, age, ownProfile, connectionStatus]
+      properties:
+        id:
+          type: integer
+          format: int64
+        uid:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        fullName:
+          type: string
+        age:
+          type: integer
+        birthDay:
+          type: string
+          format: date
+          nullable: true
+        city:
+          type: string
+        country:
+          type: string
+        objective:
+          type: string
+        summary:
+          type: string
+        info:
+          type: string
+        largePhoto:
+          type: string
+        smallPhoto:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        completed:
+          type: boolean
+        ownProfile:
+          type: boolean
+        connectionStatus:
+          type: string
+          enum: [NONE, SELF, CONNECTED, INCOMING_REQUEST, OUTGOING_REQUEST]
+        contacts:
+          $ref: '#/components/schemas/ContactsItem'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillItem'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageItem'
+        hobbies:
+          type: array
+          items:
+            $ref: '#/components/schemas/HobbyItem'
+        practics:
+          type: array
+          items:
+            $ref: '#/components/schemas/PracticItem'
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateItem'
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseItem'
+        educations:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationItem'
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileSummary'
+        mutualConnections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileSummary'
+        connectionsCount:
+          type: integer
+        mutualConnectionsCount:
+          type: integer
+
+    ConnectionSummary:
+      type: object
+      required: [uid, fullName, age]
+      properties:
+        uid:
+          type: string
+        fullName:
+          type: string
+        age:
+          type: integer
+        city:
+          type: string
+        country:
+          type: string
+        objective:
+          type: string
+        summary:
+          type: string
+        smallPhoto:
+          type: string
+        connectedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ContactsItem:
+      type: object
+      properties:
+        facebook:
+          type: string
+        linkedin:
+          type: string
+        github:
+          type: string
+        stackoverflow:
+          type: string
+
+    SkillItem:
+      type: object
+      required: [category, value]
+      properties:
+        category:
+          type: string
+        value:
+          type: string
+
+    LanguageItem:
+      type: object
+      required: [name, level, hasLanguageType]
+      properties:
+        name:
+          type: string
+        level:
+          type: string
+          enum: [BEGINNER, ELEMENTARY, PRE_INTERMEDIATE, INTERMEDIATE, UPPER_INTERMEDIATE, ADVANCED, PROFICIENCY]
+        type:
+          type: string
+          enum: [ALL, SPOKEN, WRITING]
+          nullable: true
+        hasLanguageType:
+          type: boolean
+
+    HobbyItem:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        cssClassName:
+          type: string
+
+    PracticItem:
+      type: object
+      properties:
+        company:
+          type: string
+        position:
+          type: string
+        responsibilities:
+          type: string
+        beginDate:
+          type: string
+          format: date
+        finishDate:
+          type: string
+          format: date
+          nullable: true
+        finish:
+          type: boolean
+        demo:
+          type: string
+        src:
+          type: string
+
+    CertificateItem:
+      type: object
+      properties:
+        name:
+          type: string
+        issuer:
+          type: string
+        smallUrl:
+          type: string
+        largeUrl:
+          type: string
+
+    CourseItem:
+      type: object
+      properties:
+        name:
+          type: string
+        school:
+          type: string
+        finishDate:
+          type: string
+          format: date
+          nullable: true
+        finish:
+          type: boolean
+
+    EducationItem:
+      type: object
+      properties:
+        faculty:
+          type: string
+        summary:
+          type: string
+        university:
+          type: string
+        beginYear:
+          type: integer
+        finishYear:
+          type: integer
+          nullable: true
+        finish:
+          type: boolean
+
+    InfoForm:
+      type: object
+      properties:
+        birthDay:
+          type: string
+          format: date
+        country:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 100
+        objective:
+          type: string
+        summary:
+          type: string
+        info:
+          type: string
+
+    ContactsForm:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+        facebook:
+          type: string
+        linkedin:
+          type: string
+        github:
+          type: string
+        stackoverflow:
+          type: string
+
+    SkillForm:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillItem'
+
+    PracticForm:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PracticItem'
+
+    EducationForm:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationItem'
+
+    CourseForm:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseItem'
+
+    LanguageForm:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageItem'
+
+    CertificateForm:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateItem'
+
+    HobbyForm:
+      type: object
+      required: [hobbyIds]
+      properties:
+        hobbyIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword, confirmPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 6
+          maxLength: 100
+        confirmPassword:
+          type: string
+          minLength: 6
+          maxLength: 100
+
+    ConnectionsVisibilityForm:
+      type: object
+      required: [visibleToConnections]
+      properties:
+        visibleToConnections:
+          type: boolean
+
+    ConnectionsVisibilityResponse:
+      type: object
+      required: [visibleToConnections]
+      properties:
+        visibleToConnections:
+          type: boolean
+
+    PhotoResponse:
+      type: object
+      required: [largeUrl, smallUrl]
+      properties:
+        largeUrl:
+          type: string
+        smallUrl:
+          type: string
+
+    UploadCertificateResult:
+      type: object
+      required: [certificateName, largeUrl, smallUrl]
+      properties:
+        certificateName:
+          type: string
+        largeUrl:
+          type: string
+        smallUrl:
+          type: string
+
+    ConnectionActionRequest:
+      type: object
+      properties:
+        uid:
+          type: string
+        action:
+          type: string
+
+    ConnectionItem:
+      type: object
+      required: [uid, fullName, state]
+      properties:
+        uid:
+          type: string
+        fullName:
+          type: string
+        smallPhoto:
+          type: string
+        objective:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        state:
+          type: string
+          enum: [NONE, SELF, CONNECTED, INCOMING_REQUEST, OUTGOING_REQUEST]
+        requestedAt:
+          type: string
+          format: date-time
+          nullable: true
+        respondedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ConnectionOverview:
+      type: object
+      required: [connections, incomingRequests, outgoingRequests]
+      properties:
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectionItem'
+        incomingRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectionItem'
+        outgoingRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectionItem'
+
+    ProfileRegistrationRequest:
+      type: object
+      required: [uid, firstName, lastName, password]
+      properties:
+        uid:
+          type: string
+          minLength: 3
+          maxLength: 64
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 64
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 64
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+
+    ProfileIdentifierLookupRequest:
+      type: object
+      required: [identifier]
+      properties:
+        identifier:
+          type: string
+
+    ProfileUidUpdateRequest:
+      type: object
+      required: [uid]
+      properties:
+        uid:
+          type: string
+          minLength: 3
+          maxLength: 64
+
+    ProfileAuthResponse:
+      type: object
+      required: [id, uid, firstName, lastName]
+      properties:
+        id:
+          type: integer
+          format: int64
+        uid:
+          type: string
+        passwordHash:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+
+    ProfileLookupResponse:
+      type: object
+      required: [id, uid, firstName, lastName]
+      properties:
+        id:
+          type: integer
+          format: int64
+        uid:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+
+    ApiErrorResponse:
+      type: object
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiFieldError'
+
+    ApiFieldError:
+      type: object
+      required: [field, message]
+      properties:
+        field:
+          type: string
+        message:
+          type: string

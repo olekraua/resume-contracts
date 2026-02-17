@@ -1,0 +1,110 @@
+asyncapi: 2.6.0
+info:
+  title: Resume Profile Event Contract
+  version: 1.0.0
+  description: Public Kafka events produced from profile-service outbox.
+defaultContentType: application/json
+servers:
+  kafka:
+    protocol: kafka
+    url: kafka:9092
+channels:
+  resume.profile.index:
+    description: Profile snapshot for search indexing.
+    publish:
+      operationId: publishProfileIndex
+      message:
+        $ref: '#/components/messages/ProfileIndexingSnapshot'
+    subscribe:
+      operationId: consumeProfileIndex
+      message:
+        $ref: '#/components/messages/ProfileIndexingSnapshot'
+
+  resume.profile.remove:
+    description: Profile removal event for de-indexing.
+    publish:
+      operationId: publishProfileRemove
+      message:
+        $ref: '#/components/messages/ProfileRemoved'
+    subscribe:
+      operationId: consumeProfileRemove
+      message:
+        $ref: '#/components/messages/ProfileRemoved'
+
+components:
+  messageTraits:
+    OutboxHeaders:
+      headers:
+        type: object
+        required: [x-event-id, x-event-type, x-source-service, x-occurred-at]
+        properties:
+          x-event-id:
+            type: string
+          x-event-type:
+            type: string
+            enum: [PROFILE_INDEX, PROFILE_REMOVE]
+          x-source-service:
+            type: string
+            enum: [resume-profile-service]
+          x-occurred-at:
+            type: string
+            format: date-time
+
+  messages:
+    ProfileIndexingSnapshot:
+      name: ProfileIndexingSnapshot
+      title: Profile indexing snapshot
+      traits:
+        - $ref: '#/components/messageTraits/OutboxHeaders'
+      payload:
+        $ref: '#/components/schemas/ProfileIndexingSnapshot'
+
+    ProfileRemoved:
+      name: ProfileRemoved
+      title: Profile removed
+      traits:
+        - $ref: '#/components/messageTraits/OutboxHeaders'
+      payload:
+        $ref: '#/components/schemas/ProfileRemovalPayload'
+
+  schemas:
+    ProfileIndexingSnapshot:
+      type: object
+      required: [profileId, uid, firstName, lastName, skills]
+      properties:
+        profileId:
+          type: integer
+          format: int64
+        uid:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        smallPhoto:
+          type: string
+        birthDay:
+          type: string
+          format: date
+        objective:
+          type: string
+        summary:
+          type: string
+        info:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+
+    ProfileRemovalPayload:
+      type: object
+      required: [profileId]
+      properties:
+        profileId:
+          type: integer
+          format: int64

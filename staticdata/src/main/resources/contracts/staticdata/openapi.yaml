@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: Resume Static Data Service API Contract
+  version: 1.0.0
+  description: Public static dictionary API consumed by frontend and backend services.
+servers:
+  - url: /
+tags:
+  - name: StaticData
+paths:
+  /api/static-data:
+    get:
+      tags: [StaticData]
+      summary: Get all static dictionaries for profile forms
+      operationId: getStaticData
+      security: []
+      responses:
+        '200':
+          description: Static dictionaries and calendar values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaticDataResponse'
+
+components:
+  schemas:
+    StaticDataResponse:
+      type: object
+      required:
+        - skillCategories
+        - languageTypes
+        - languageLevels
+        - hobbies
+        - practicYears
+        - courseYears
+        - educationYears
+        - months
+      properties:
+        skillCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillCategoryItem'
+        languageTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageTypeItem'
+        languageLevels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageLevelItem'
+        hobbies:
+          type: array
+          items:
+            $ref: '#/components/schemas/HobbyItem'
+        practicYears:
+          type: array
+          items:
+            type: integer
+        courseYears:
+          type: array
+          items:
+            type: integer
+        educationYears:
+          type: array
+          items:
+            type: integer
+        months:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthItem'
+
+    SkillCategoryItem:
+      type: object
+      required: [id, category]
+      properties:
+        id:
+          type: integer
+          format: int64
+        category:
+          type: string
+
+    LanguageTypeItem:
+      type: object
+      required: [code, label]
+      properties:
+        code:
+          type: string
+          enum: [ALL, SPOKEN, WRITING]
+        label:
+          type: string
+
+    LanguageLevelItem:
+      type: object
+      required: [code, sliderValue]
+      properties:
+        code:
+          type: string
+          enum: [BEGINNER, ELEMENTARY, PRE_INTERMEDIATE, INTERMEDIATE, UPPER_INTERMEDIATE, ADVANCED, PROFICIENCY]
+        sliderValue:
+          type: integer
+
+    HobbyItem:
+      type: object
+      required: [id, name, cssClassName]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        cssClassName:
+          type: string
+
+    MonthItem:
+      type: object
+      required: [value, label]
+      properties:
+        value:
+          type: integer
+          minimum: 1
+          maximum: 12
+        label:
+          type: string
