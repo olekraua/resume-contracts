@@ -11,6 +11,7 @@ Contract-first repository for public API and event contracts across resume platf
 - `file` (`resume-file-contracts`): file-platform REST OpenAPI and file pipeline AsyncAPI.
 - `notification` (`resume-notification-contracts`): notification consumer AsyncAPI.
 - `outbox-relay` (`resume-outbox-relay-contracts`): outbox relay Kafka publish AsyncAPI.
+- `agent` (`resume-agent-contracts`): AI research REST OpenAPI and research lifecycle AsyncAPI.
 
 ## Build
 `./mvnw -DskipTests install`
@@ -54,6 +55,8 @@ Run locally:
 - `file/src/main/resources/contracts/file/asyncapi.yaml`
 - `notification/src/main/resources/contracts/notification/asyncapi.yaml`
 - `outbox-relay/src/main/resources/contracts/outbox-relay/asyncapi.yaml`
+- `agent/src/main/resources/contracts/agent/openapi.yaml`
+- `agent/src/main/resources/contracts/agent/asyncapi.yaml`
 
 ## Consumer Usage
 Use module-specific Maven artifacts from this repository, for example:

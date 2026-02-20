@@ -1,0 +1,198 @@
+asyncapi: 2.6.0
+info:
+  title: Resume Agent Service Event Contract
+  version: 1.0.0
+  description: Kafka events for AI research workflow lifecycle and indexed source updates.
+defaultContentType: application/json
+servers:
+  kafka:
+    protocol: kafka
+    url: kafka:9092
+channels:
+  resume.research.job.created:
+    description: Published when a research job is accepted.
+    publish:
+      operationId: onResearchJobCreated
+      message:
+        $ref: '#/components/messages/ResearchJobCreated'
+
+  resume.research.job.progress:
+    description: Published on progress updates for long-running research jobs.
+    publish:
+      operationId: onResearchJobProgress
+      message:
+        $ref: '#/components/messages/ResearchJobProgress'
+
+  resume.research.job.completed:
+    description: Published when a research job is completed successfully.
+    publish:
+      operationId: onResearchJobCompleted
+      message:
+        $ref: '#/components/messages/ResearchJobCompleted'
+
+  resume.research.job.failed:
+    description: Published when a research job fails.
+    publish:
+      operationId: onResearchJobFailed
+      message:
+        $ref: '#/components/messages/ResearchJobFailed'
+
+  resume.research.chunk.indexed:
+    description: Consumed when a knowledge chunk has been indexed and is available for retrieval.
+    subscribe:
+      operationId: onResearchChunkIndexed
+      message:
+        $ref: '#/components/messages/ResearchChunkIndexed'
+
+components:
+  messageTraits:
+    BackboneHeaders:
+      headers:
+        type: object
+        required: [x-event-id, x-event-type, x-source-service, x-occurred-at]
+        properties:
+          x-event-id:
+            type: string
+          x-event-type:
+            type: string
+            enum:
+              - RESEARCH_JOB_CREATED
+              - RESEARCH_JOB_PROGRESS
+              - RESEARCH_JOB_COMPLETED
+              - RESEARCH_JOB_FAILED
+              - RESEARCH_CHUNK_INDEXED
+          x-source-service:
+            type: string
+          x-occurred-at:
+            type: string
+            format: date-time
+
+  messages:
+    ResearchJobCreated:
+      name: ResearchJobCreated
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ResearchJobCreatedPayload'
+
+    ResearchJobProgress:
+      name: ResearchJobProgress
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ResearchJobProgressPayload'
+
+    ResearchJobCompleted:
+      name: ResearchJobCompleted
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ResearchJobCompletedPayload'
+
+    ResearchJobFailed:
+      name: ResearchJobFailed
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ResearchJobFailedPayload'
+
+    ResearchChunkIndexed:
+      name: ResearchChunkIndexed
+      traits:
+        - $ref: '#/components/messageTraits/BackboneHeaders'
+      payload:
+        $ref: '#/components/schemas/ResearchChunkIndexedPayload'
+
+  schemas:
+    Citation:
+      type: object
+      required: [sourceId, chunkId, snippet]
+      properties:
+        sourceId:
+          type: string
+        chunkId:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        snippet:
+          type: string
+
+    ResearchJobCreatedPayload:
+      type: object
+      required: [jobId, query, topK]
+      properties:
+        jobId:
+          type: string
+        query:
+          type: string
+        topK:
+          type: integer
+          minimum: 1
+        requestedBy:
+          type: string
+
+    ResearchJobProgressPayload:
+      type: object
+      required: [jobId, status, progress]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [SUBMITTED, RUNNING]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+
+    ResearchJobCompletedPayload:
+      type: object
+      required: [jobId, status, answer, model, citations, retrievedDocuments]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [COMPLETED]
+        answer:
+          type: string
+        model:
+          type: string
+        retrievedDocuments:
+          type: integer
+          minimum: 0
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+
+    ResearchJobFailedPayload:
+      type: object
+      required: [jobId, status, error]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [FAILED]
+        error:
+          type: string
+
+    ResearchChunkIndexedPayload:
+      type: object
+      required: [sourceId, chunkId, index, content]
+      properties:
+        sourceId:
+          type: string
+        chunkId:
+          type: string
+        index:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        content:
+          type: string

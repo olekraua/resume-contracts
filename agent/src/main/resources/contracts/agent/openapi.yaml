@@ -1,0 +1,172 @@
+openapi: 3.0.3
+info:
+  title: Resume Agent Service API Contract
+  version: 1.0.0
+  description: API contract for AI Research jobs.
+servers:
+  - url: /
+tags:
+  - name: Research
+paths:
+  /api/research/jobs:
+    post:
+      tags: [Research]
+      summary: Submit a new AI research job
+      operationId: submitResearchJob
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResearchJobCreateRequest'
+      responses:
+        '202':
+          description: Job accepted for asynchronous processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchJobAcceptedResponse'
+
+  /api/research/jobs/{jobId}:
+    get:
+      tags: [Research]
+      summary: Get research job execution status
+      operationId: getResearchJobStatus
+      security: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchJobStatusResponse'
+        '404':
+          description: Job not found
+
+  /api/research/preview:
+    post:
+      tags: [Research]
+      summary: Run synchronous research preview (debug/smoke)
+      operationId: previewResearchAnswer
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResearchPreviewRequest'
+      responses:
+        '200':
+          description: Synchronous RAG response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchPreviewResponse'
+
+components:
+  schemas:
+    ResearchJobCreateRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 3
+          maxLength: 4000
+        topK:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 5
+        requestedBy:
+          type: string
+          maxLength: 128
+
+    ResearchPreviewRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 3
+          maxLength: 4000
+        topK:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 5
+
+    ResearchJobAcceptedResponse:
+      type: object
+      required: [jobId, runId, status]
+      properties:
+        jobId:
+          type: string
+        runId:
+          type: string
+        status:
+          type: string
+          enum: [SUBMITTED]
+
+    ResearchJobStatusResponse:
+      type: object
+      required: [jobId, status, progress]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [SUBMITTED, RUNNING, COMPLETED, FAILED]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        error:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResearchJobResult'
+
+    ResearchPreviewResponse:
+      type: object
+      required: [result]
+      properties:
+        result:
+          $ref: '#/components/schemas/ResearchJobResult'
+
+    ResearchJobResult:
+      type: object
+      required: [answer, model, citations, retrievedDocuments]
+      properties:
+        answer:
+          type: string
+        model:
+          type: string
+        retrievedDocuments:
+          type: integer
+          minimum: 0
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+
+    Citation:
+      type: object
+      required: [sourceId, chunkId, snippet]
+      properties:
+        sourceId:
+          type: string
+        chunkId:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        snippet:
+          type: string

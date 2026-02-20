@@ -39,6 +39,7 @@
         <module>file</module>
         <module>notification</module>
         <module>outbox-relay</module>
+        <module>agent</module>
     </modules>
 
     <properties>
