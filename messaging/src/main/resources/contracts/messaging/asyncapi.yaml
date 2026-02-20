@@ -1,16 +1,17 @@
 asyncapi: 2.6.0
 info:
   title: Resume Messaging Realtime Contract
-  version: 2.0.0
-  description: Contract-first definition for custom rt-v1 binary realtime protocol over WebSocket.
-defaultContentType: application/json
+  version: 3.0.0
+  description: Contract-first definition for custom rt-v2 binary realtime protocol over WebSocket with protobuf payloads.
+defaultContentType: application/protobuf
 servers:
   messagingRealtime:
     url: /rt
     protocol: ws
-    description: Custom rt-v1 binary WebSocket endpoint
-x-rt-protocol: rt-v1
-x-rt-frame-version: 1
+    description: Custom rt-v2 binary WebSocket endpoint
+x-rt-protocol: rt-v2
+x-rt-frame-version: 2
+x-rt-payload-codec: protobuf-value-v1
 x-rt-frame-header:
   description: Binary frame header (big-endian)
   fields:
