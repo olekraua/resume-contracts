@@ -151,6 +151,57 @@ paths:
         '401':
           $ref: '#/components/responses/ApiError'
 
+  /api/auth/sessions:
+    get:
+      tags: [Auth]
+      summary: List active sessions for current user
+      operationId: sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active sessions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '401':
+          $ref: '#/components/responses/ApiError'
+
+  /api/auth/sessions/{id}:
+    delete:
+      tags: [Auth]
+      summary: Revoke a specific active session
+      operationId: revokeSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Session revoked
+        '401':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /api/auth/logout-current:
+    post:
+      tags: [Auth]
+      summary: Logout current active session
+      operationId: logoutCurrent
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          $ref: '#/components/responses/ApiError'
+
   /api/auth/login:
     post:
       tags: [Auth]
@@ -511,6 +562,47 @@ components:
         fullName:
           type: string
           nullable: true
+
+    SessionItem:
+      type: object
+      required: [id, current, createdAt, lastSeenAt]
+      properties:
+        id:
+          type: string
+        current:
+          type: boolean
+        device:
+          type: string
+          nullable: true
+        ip:
+          type: string
+          nullable: true
+        userAgent:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    SessionListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionItem'
 
     UidHintResponse:
       type: object
