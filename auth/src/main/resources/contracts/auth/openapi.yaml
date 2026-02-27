@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Resume Auth Service API Contract
-  version: 1.0.0
+  version: 1.1.0
   description: Public REST and OIDC contract for resume-auth-service.
 servers:
   - url: /
