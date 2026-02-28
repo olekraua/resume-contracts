@@ -29,16 +29,18 @@ Contract-first repository for public API and event contracts across resume platf
   - `push`: previous push SHA (`github.event.before`)
   - `pull_request`: merge-base with target branch (`origin/<base>`)
 - checks:
+  - strict schema lint via Spectral (`.spectral.yaml`)
   - OpenAPI diff via `openapi-diff`
   - AsyncAPI diff via `@asyncapi/diff`
   - version increment policy validation
 - gate fails when:
+  - Spectral reports warnings/errors for contract files,
   - schema changed but `info.version` did not increase,
   - potentially breaking/unclassified changes were made without a major bump,
   - `info.version` is missing or invalid.
 
 Run locally:
-`npm install && npm run contracts:check`
+`npm install && npm run contracts:lint && npm run contracts:check`
 
 ## Contract Files
 - `auth/src/main/resources/contracts/auth/openapi.yaml`

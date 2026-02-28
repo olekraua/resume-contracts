@@ -1,0 +1,12 @@
+extends:
+  - spectral:oas
+  - spectral:asyncapi
+
+rules:
+  info-contact: off
+  operation-description: off
+  asyncapi-tags: off
+  asyncapi-info-contact: off
+  asyncapi-info-license: off
+  asyncapi-operation-description: off
+  asyncapi-latest-version: off
