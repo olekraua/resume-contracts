@@ -34,7 +34,7 @@ jobs:
 
       - name: Fetch pull request base branch
         if: github.event_name == 'pull_request'
-        run: git fetch --no-tags --prune --depth=1 origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+        run: git fetch --no-tags --prune origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
 
       - name: Ensure Maven Wrapper is executable
         run: chmod +x mvnw
