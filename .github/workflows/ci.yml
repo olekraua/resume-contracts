@@ -47,7 +47,7 @@ jobs:
 
       - name: Run breaking-change gate
         env:
-         SCHEMA_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+            SCHEMA_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
         run: npm run contracts:check
 
       - name: Build and run checks
