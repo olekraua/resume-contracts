@@ -1,7 +1,7 @@
 asyncapi: 2.6.0
 info:
   title: Resume Agent Service Event Contract
-  version: 1.0.0
+  version: 2.0.0
   description: Kafka events for AI research workflow lifecycle and indexed source updates.
 defaultContentType: application/json
 servers:
@@ -49,7 +49,7 @@ components:
     BackboneHeaders:
       headers:
         type: object
-        required: [x-event-id, x-event-type, x-source-service, x-occurred-at]
+        required: [x-event-id, x-event-type, x-source-service, x-occurred-at, x-correlation-id]
         properties:
           x-event-id:
             type: string
@@ -66,6 +66,8 @@ components:
           x-occurred-at:
             type: string
             format: date-time
+          x-correlation-id:
+            type: string
 
   messages:
     ResearchJobCreated:
@@ -121,10 +123,16 @@ components:
 
     ResearchJobCreatedPayload:
       type: object
-      required: [jobId, query, topK]
+      required: [jobId, runId, correlationId, stage, query, topK]
       properties:
         jobId:
           type: string
+        runId:
+          type: string
+        correlationId:
+          type: string
+        stage:
+          $ref: '#/components/schemas/ResearchJobStage'
         query:
           type: string
         topK:
@@ -135,9 +143,13 @@ components:
 
     ResearchJobProgressPayload:
       type: object
-      required: [jobId, status, progress]
+      required: [jobId, runId, correlationId, status, progress, stage]
       properties:
         jobId:
+          type: string
+        runId:
+          type: string
+        correlationId:
           type: string
         status:
           type: string
@@ -146,16 +158,24 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+        stage:
+          $ref: '#/components/schemas/ResearchJobStage'
 
     ResearchJobCompletedPayload:
       type: object
-      required: [jobId, status, answer, model, citations, retrievedDocuments]
+      required: [jobId, runId, correlationId, status, stage, answer, model, citations, retrievedDocuments]
       properties:
         jobId:
+          type: string
+        runId:
+          type: string
+        correlationId:
           type: string
         status:
           type: string
           enum: [COMPLETED]
+        stage:
+          $ref: '#/components/schemas/ResearchJobStage'
         answer:
           type: string
         model:
@@ -170,15 +190,31 @@ components:
 
     ResearchJobFailedPayload:
       type: object
-      required: [jobId, status, error]
+      required: [jobId, runId, correlationId, status, stage, error]
       properties:
         jobId:
+          type: string
+        runId:
+          type: string
+        correlationId:
           type: string
         status:
           type: string
           enum: [FAILED]
+        stage:
+          $ref: '#/components/schemas/ResearchJobStage'
         error:
           type: string
+
+    ResearchJobStage:
+      type: string
+      enum:
+        - SUBMITTED
+        - RETRIEVING_CONTEXT
+        - SYNTHESIZING_ANSWER
+        - COMPLETED
+        - FAILED
+        - UNKNOWN
 
     ResearchChunkIndexedPayload:
       type: object
