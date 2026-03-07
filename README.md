@@ -42,6 +42,18 @@ Contract-first repository for public API and event contracts across resume platf
 Run locally:
 `npm install && npm run contracts:lint && npm run contracts:check`
 
+## Baseline Snapshot
+Use a deterministic snapshot to capture the current state of contracts and CI gates:
+- command: `npm run contracts:baseline`
+- output: `baselines/contracts-ci-baseline.json`
+- snapshot includes:
+  - current git branch/commit,
+  - all tracked `openapi.yaml` / `asyncapi.yaml` files with `info.title`, `info.version`, `sha256`,
+  - CI gate artifact hashes (`.github/workflows/ci.yml`, lint/check scripts, ruleset, package manifests).
+
+Recommended local baseline flow:
+`npm install && npm run contracts:baseline && npm run contracts:lint && npm run contracts:check`
+
 ## Contract Files
 - `auth/src/main/resources/contracts/auth/openapi.yaml`
 - `auth/src/main/resources/contracts/auth/asyncapi.yaml`

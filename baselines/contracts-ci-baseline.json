@@ -1,0 +1,140 @@
+{
+  "schema": "resume-contracts-baseline/v1",
+  "generatedAtUtc": "2026-03-07T22:02:07.309Z",
+  "git": {
+    "branch": "feature/cntr-101-baseline-contract-ci-gates",
+    "commit": "3eff9817d9f401f9fb35fa53477ca196fa6bfda3"
+  },
+  "contracts": {
+    "totalFiles": 16,
+    "files": [
+      {
+        "path": "agent/src/main/resources/contracts/agent/asyncapi.yaml",
+        "title": "Resume Agent Service Event Contract",
+        "version": "2.0.0",
+        "sha256": "00d91f44fd95a42059622d0ca16a03d709911e722eece0578dad3ac0adb1597d"
+      },
+      {
+        "path": "agent/src/main/resources/contracts/agent/openapi.yaml",
+        "title": "Resume Agent Service API Contract",
+        "version": "1.0.0",
+        "sha256": "97184db3d86d84853e9afd7109ec0724fd9e391d36107d4f8f0f6607cdf795c4"
+      },
+      {
+        "path": "auth/src/main/resources/contracts/auth/asyncapi.yaml",
+        "title": "Resume Auth Event Contract",
+        "version": "1.0.0",
+        "sha256": "60e45669712e4d979e4d3940a63cafce9b90b12d59145ff635fe82918163ed17"
+      },
+      {
+        "path": "auth/src/main/resources/contracts/auth/openapi.yaml",
+        "title": "Resume Auth Service API Contract",
+        "version": "1.1.0",
+        "sha256": "20c2e5d4743cd874413930c239c7b68547f343c7e1fe63fd67846061380e4aac"
+      },
+      {
+        "path": "file/src/main/resources/contracts/file/asyncapi.yaml",
+        "title": "Resume File Platform Event Contract",
+        "version": "1.0.0",
+        "sha256": "4337dd78d859ac074662e0fe636d2053ffc1e5df26056517c8b047f72ee28431"
+      },
+      {
+        "path": "file/src/main/resources/contracts/file/openapi.yaml",
+        "title": "Resume File Platform API Contract",
+        "version": "1.0.0",
+        "sha256": "e99eefbfe3bc1a8a9c5d65f92cdc60fc2880f7d8f0af6041e31bf0e5a98a4c58"
+      },
+      {
+        "path": "messaging/src/main/resources/contracts/backbone/asyncapi.yaml",
+        "title": "Resume Async Backbone Contract",
+        "version": "1.0.0",
+        "sha256": "ef6b97272c1fdef03af3de398a9709e18df4a1c426ad6a3ce5a347630c26c671"
+      },
+      {
+        "path": "messaging/src/main/resources/contracts/messaging/asyncapi.yaml",
+        "title": "Resume Messaging Realtime Contract",
+        "version": "3.0.0",
+        "sha256": "bd24f0a6a9c602c1042bb8c0b31c012cda85548dfca88def020bf6c9debc1920"
+      },
+      {
+        "path": "messaging/src/main/resources/contracts/messaging/openapi.yaml",
+        "title": "Resume Messaging API Contract",
+        "version": "1.0.0",
+        "sha256": "4adf10b0790fed5739e2b426a77575c5a7a9781f40e4ce520cd40d6abe173e87"
+      },
+      {
+        "path": "notification/src/main/resources/contracts/notification/asyncapi.yaml",
+        "title": "Resume Notification Event Contract",
+        "version": "1.0.0",
+        "sha256": "80e8fe2e154a35377b1c2c620c06495faaa51363261a2c52727b1ce85469b73b"
+      },
+      {
+        "path": "outbox-relay/src/main/resources/contracts/outbox-relay/asyncapi.yaml",
+        "title": "Resume Outbox Relay Event Contract",
+        "version": "1.0.0",
+        "sha256": "99bcd7d0f15fab45ab166d3484378d8bed1163ac37280119aeda5324c358a1e0"
+      },
+      {
+        "path": "profile/src/main/resources/contracts/profile/asyncapi.yaml",
+        "title": "Resume Profile Event Contract",
+        "version": "1.0.0",
+        "sha256": "b89e16d3dc7be1dafd8635447c1bde91c716535e0bb5188fe647481a85ffb797"
+      },
+      {
+        "path": "profile/src/main/resources/contracts/profile/openapi.yaml",
+        "title": "Resume Profile Service API Contract",
+        "version": "1.0.0",
+        "sha256": "5f1ce4235cb34959310442b904001a8fb4adb5d6c3ddb6ff4a00b46322ed23a0"
+      },
+      {
+        "path": "search/src/main/resources/contracts/search/asyncapi.yaml",
+        "title": "Resume Search Indexing Event Contract",
+        "version": "1.0.0",
+        "sha256": "50e2683b8a2d2d91072dbdab34883e498f211477ea2e7caa880be029fbb29d39"
+      },
+      {
+        "path": "search/src/main/resources/contracts/search/openapi.yaml",
+        "title": "Resume Search Service API Contract",
+        "version": "1.0.0",
+        "sha256": "8a50b6eaf5ba537ed58f73505a5535b8e46198f3129ec93d723019e49bcf313d"
+      },
+      {
+        "path": "staticdata/src/main/resources/contracts/staticdata/openapi.yaml",
+        "title": "Resume Static Data Service API Contract",
+        "version": "1.0.0",
+        "sha256": "9ae63109c5a112870782a217584e34b41bbcc71dcd9f233e8c5f44a30b64c47d"
+      }
+    ]
+  },
+  "ciGates": {
+    "lintCommand": "npm run contracts:lint",
+    "compatibilityCommand": "npm run contracts:check",
+    "workflowPath": ".github/workflows/ci.yml",
+    "artifactHashes": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "sha256": "04ff2815827b7b0b40ea4432f88f39da71efc01933fa736de1350ae527cc863d"
+      },
+      {
+        "path": ".spectral.yaml",
+        "sha256": "a2ad63756f229416a5f0ba7a859a4327a36975298bad435f613f2cdc4d520936"
+      },
+      {
+        "path": "scripts/lint-contracts.cjs",
+        "sha256": "2e0ccf23ced9dfd5f71c41ada78307d74bed3934a7b18b7986f760f1074e0529"
+      },
+      {
+        "path": "scripts/check-schema-compatibility.cjs",
+        "sha256": "fb921b7c1e69909643d04e16ca77dc15f66ed55d34a67ad180453d6be8700471"
+      },
+      {
+        "path": "package.json",
+        "sha256": "34e9cbd7064537587cefa3a79c29e98a3aceaab5feec726278ac98ddb6fab9a0"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "ccd9907ec2eefd8e8b46fbb1a3502bfb84bfea17c377285e88df4a6a914cb760"
+      }
+    ]
+  }
+}
